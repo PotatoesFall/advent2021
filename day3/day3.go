@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	input, err := os.ReadFile(`input`)
+	input, err := os.ReadFile(`input3`)
 	if err != nil {
 		panic(err)
 	}
