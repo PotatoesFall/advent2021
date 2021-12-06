@@ -45,7 +45,7 @@ func getWinnerAndLoser(boards []*Board, numbersDrawn []int) (*Board, *Board) {
 		}
 	}
 
-	if winCount != 1 {
+	if winCount != 1 || loseCount != 1 {
 		panic(fmt.Sprintf(`cannot determine winner: %d winners`, winCount))
 	}
 
