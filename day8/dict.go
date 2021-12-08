@@ -1,6 +1,6 @@
 package main
 
-var digitsBySegmentCount = map[int][]digit{
+var digitsByCount = map[int][]Digit{
 	2: {1},
 	3: {7},
 	4: {4},
@@ -9,53 +9,53 @@ var digitsBySegmentCount = map[int][]digit{
 	7: {8},
 }
 
-var possibleTrueSegmentsByCount = map[int][]segNum{
-	2: {2, 5},
-	3: {0, 2, 5},
-	4: {1, 2, 3, 5},
-	5: {0, 2, 3, 4, 6, 5, 1},
-	6: {0, 1, 2, 4, 5, 6, 3},
-	7: {0, 1, 2, 3, 4, 5, 6},
+var possibleTrueSegmentsByCount = map[int]map[TrueSegment]bool{
+	2: {2: true, 5: true},
+	3: {0: true, 2: true, 5: true},
+	4: {1: true, 2: true, 3: true, 5: true},
+	5: {0: true, 2: true, 3: true, 4: true, 6: true, 5: true, 1: true},
+	6: {0: true, 1: true, 2: true, 4: true, 5: true, 6: true, 3: true},
+	7: {0: true, 1: true, 2: true, 3: true, 4: true, 5: true, 6: true},
 }
 
-// top to bottom, left to right
-var possibleDigitsByTrueSegmentNumber = map[segNum][]digit{
-	0: {0, 2, 3, 5, 6, 7, 8, 9},
-	1: {0, 4, 5, 6, 8, 9},
-	2: {0, 1, 2, 3, 4, 7, 8, 9},
-	3: {2, 3, 4, 5, 6, 8, 9},
-	4: {0, 2, 6, 8},
-	5: {0, 1, 3, 4, 5, 6, 7, 8, 9},
-	6: {0, 2, 3, 5, 6, 8, 9},
-}
+// // top to bottom, left to right
+// var possibleDigitsByTrueSegmentNumber = map[SegmentNumber][]Digit{
+// 	0: {0, 2, 3, 5, 6, 7, 8, 9},
+// 	1: {0, 4, 5, 6, 8, 9},
+// 	2: {0, 1, 2, 3, 4, 7, 8, 9},
+// 	3: {2, 3, 4, 5, 6, 8, 9},
+// 	4: {0, 2, 6, 8},
+// 	5: {0, 1, 3, 4, 5, 6, 7, 8, 9},
+// 	6: {0, 2, 3, 5, 6, 8, 9},
+// }
 
-var trueSegmentNumbersByDigit = map[digit][]segNum{
-	0: {0, 1, 2, 4, 5, 6},
-	1: {2, 5},
-	2: {0, 2, 3, 4, 6},
-	3: {0, 2, 3, 5, 6},
-	4: {1, 2, 3, 5},
-	5: {0, 1, 3, 5, 6},
-	6: {0, 1, 3, 4, 5, 6},
-	7: {0, 2, 5},
-	8: {0, 1, 2, 3, 4, 5, 6},
-	9: {0, 1, 2, 3, 5, 6},
-}
+// var trueSegmentNumbersByDigit = map[Digit][]SegmentNumber{
+// 	0: {0, 1, 2, 4, 5, 6},
+// 	1: {2, 5},
+// 	2: {0, 2, 3, 4, 6},
+// 	3: {0, 2, 3, 5, 6},
+// 	4: {1, 2, 3, 5},
+// 	5: {0, 1, 3, 5, 6},
+// 	6: {0, 1, 3, 4, 5, 6},
+// 	7: {0, 2, 5},
+// 	8: {0, 1, 2, 3, 4, 5, 6},
+// 	9: {0, 1, 2, 3, 5, 6},
+// }
 
-var segmentCountByNumber = map[digit]int{
-	0: 6,
-	1: 2,
-	2: 5,
-	3: 5,
-	4: 4,
-	5: 5,
-	6: 6,
-	7: 3,
-	8: 7,
-	9: 6,
-}
+// var segmentCountByNumber = map[Digit]int{
+// 	0: 6,
+// 	1: 2,
+// 	2: 5,
+// 	3: 5,
+// 	4: 4,
+// 	5: 5,
+// 	6: 6,
+// 	7: 3,
+// 	8: 7,
+// 	9: 6,
+// }
 
-var segmentNumberByName = map[segName]segNum{
+var segmentByLabel = map[SegmentLabel]Segment{
 	'a': 0,
 	'b': 1,
 	'c': 2,
@@ -65,7 +65,7 @@ var segmentNumberByName = map[segName]segNum{
 	'g': 6,
 }
 
-var segmentNameByNumer = map[segNum]segName{
+var segmentLabels = map[Segment]SegmentLabel{
 	0: 'a',
 	1: 'b',
 	2: 'c',
@@ -75,4 +75,7 @@ var segmentNameByNumer = map[segNum]segName{
 	6: 'g',
 }
 
-var allSegNums = [7]segNum{0, 1, 2, 3, 4, 5, 6}
+var (
+	allSegments     = [7]Segment{0, 1, 2, 3, 4, 5, 6}
+	allTrueSegments = [7]TrueSegment{0, 1, 2, 3, 4, 5, 6}
+)

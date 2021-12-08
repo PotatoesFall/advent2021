@@ -4,22 +4,26 @@ import (
 	"strings"
 )
 
-type digit int
+// Digit is a number to be displayed on a box
+type Digit int
 
-type line struct {
-	samples [10]segments
-	output  [4]segments
+// Line is a line of input with 10 random sample readings and 4 output readings
+type Line struct {
+	samples [10]Box
+	output  [4]Box
 }
 
-func (l line) AllSegments() [14]segments {
-	var all [14]segments
+// AllBoxes returns both samples and output boxes
+func (l Line) AllBoxes() [14]Box {
+	var all [14]Box
 	copy(all[:10], l.samples[:])
 	copy(all[10:], l.output[:])
 	return all
 }
 
-func lineFromStr(str string) line {
-	var lin line
+// NewLine parses a line of input into a line
+func NewLine(str string) Line {
+	var lin Line
 
 	split := strings.Split(str, `|`)
 	split[0], split[1] = strings.TrimSpace(split[0]), strings.TrimSpace(split[1])
@@ -29,7 +33,7 @@ func lineFromStr(str string) line {
 			break
 		}
 
-		lin.samples[i] = segmentsFromStr(segmentsStr)
+		lin.samples[i] = NewBox(segmentsStr)
 	}
 
 	for i, segmentsStr := range strings.Split(split[1], ` `) {
@@ -37,21 +41,33 @@ func lineFromStr(str string) line {
 			break
 		}
 
-		lin.output[i] = segmentsFromStr(segmentsStr)
+		lin.output[i] = NewBox(segmentsStr)
 	}
 
 	return lin
 }
 
-type segments [7]bool
+// Box is a 7-segment display showing a number
+type Box [7]bool
 
-type segNum int
+// NewBox parses a new box
+func NewBox(str string) Box {
+	var seg Box
+	for _, r := range str {
+		if r < 'a' || r > 'g' {
+			panic(r)
+		}
 
-type segName rune
+		seg[segmentByLabel[SegmentLabel(r)]] = true
+	}
 
-func (s segments) Count() int {
+	return seg
+}
+
+// Count returns the number of segments contained in the Box
+func (b Box) Count() int {
 	count := 0
-	for _, seg := range s {
+	for _, seg := range b {
 		if seg {
 			count++
 		}
@@ -60,26 +76,36 @@ func (s segments) Count() int {
 	return count
 }
 
-func (s segments) String() string {
+// String returns a string representation similar to the original
+func (b Box) String() string {
 	var str string
-	for i, on := range s {
+	for i, on := range b {
 		if on {
-			str += string(segmentNameByNumer[segNum(i)])
+			str += string(segmentLabels[Segment(i)])
 		}
 	}
 
 	return str
 }
 
-func segmentsFromStr(str string) segments {
-	var seg segments
-	for _, r := range str {
-		if r < 'a' || r > 'g' {
-			panic(r)
-		}
+func (b Box) Segments() []Segment {
+	segments := []Segment{}
 
-		seg[segmentNumberByName[segName(r)]] = true
+	for seg, has := range b {
+		if has {
+			segments = append(segments, Segment(seg))
+		}
 	}
 
-	return seg
+	return segments
 }
+
+// Segment refers to a specific Segment on a Box
+type Segment int
+
+// TrueSegment refers to the actual segment that a
+// Segment corresponds to
+type TrueSegment int
+
+// SegmentLabel is the name of the segment, such as 'a'
+type SegmentLabel rune
