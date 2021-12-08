@@ -52,12 +52,10 @@ func countPart2(l Line) int {
 	for _, box := range l.AllBoxes() {
 		actualSegments := box.Segments()
 		possibleTrueSegments := possibleTrueSegmentsByCount[box.Count()]
+		notPossibleTrueSegments := invertTrueSegments(possibleTrueSegments)
+		solver.InvalidateRoundRobin(actualSegments, notPossibleTrueSegments)
 
-		solver.RestrictAllTo(actualSegments, possibleTrueSegments)
-
-		notActualSegments := invertSegments(actualSegments)
-		solver.RestrictAllNegative(notActualSegments, possibleTrueSegments)
-
+		solver.GetDigit(box)
 	}
 
 	return -1

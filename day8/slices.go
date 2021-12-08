@@ -32,3 +32,57 @@ package main
 
 // 	return newSlice
 // }
+
+func containsSegment(segments []Segment, segment Segment) bool {
+	for _, seg := range segments {
+		if seg == segment {
+			return true
+		}
+	}
+
+	return false
+}
+
+func containsTrueSegment(segments []TrueSegment, segment TrueSegment) bool {
+	for _, seg := range segments {
+		if seg == segment {
+			return true
+		}
+	}
+
+	return false
+}
+
+func invertSegments(toInvert []Segment) []Segment {
+	inverted := []Segment{}
+
+outer:
+	for _, segment := range allSegments {
+		for _, segToInvert := range toInvert {
+			if segment == segToInvert {
+				continue outer
+			}
+		}
+
+		inverted = append(inverted, segment)
+	}
+
+	return inverted
+}
+
+func invertTrueSegments(toInvert []TrueSegment) []TrueSegment {
+	inverted := []TrueSegment{}
+
+outer:
+	for _, segment := range allTrueSegments {
+		for _, segToInvert := range toInvert {
+			if segment == segToInvert {
+				continue outer
+			}
+		}
+
+		inverted = append(inverted, segment)
+	}
+
+	return inverted
+}

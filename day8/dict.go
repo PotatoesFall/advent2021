@@ -9,13 +9,13 @@ var digitsByCount = map[int][]Digit{
 	7: {8},
 }
 
-var possibleTrueSegmentsByCount = map[int]map[TrueSegment]bool{
-	2: {2: true, 5: true},
-	3: {0: true, 2: true, 5: true},
-	4: {1: true, 2: true, 3: true, 5: true},
-	5: {0: true, 2: true, 3: true, 4: true, 6: true, 5: true, 1: true},
-	6: {0: true, 1: true, 2: true, 4: true, 5: true, 6: true, 3: true},
-	7: {0: true, 1: true, 2: true, 3: true, 4: true, 5: true, 6: true},
+var possibleTrueSegmentsByCount = map[int][]TrueSegment{
+	2: {2, 5},
+	3: {0, 2, 5},
+	4: {1, 2, 3, 5},
+	5: {0, 2, 3, 4, 6, 5, 1},
+	6: {0, 1, 2, 4, 5, 6, 3},
+	7: {0, 1, 2, 3, 4, 5, 6},
 }
 
 // // top to bottom, left to right
@@ -29,18 +29,18 @@ var possibleTrueSegmentsByCount = map[int]map[TrueSegment]bool{
 // 	6: {0, 2, 3, 5, 6, 8, 9},
 // }
 
-// var trueSegmentNumbersByDigit = map[Digit][]SegmentNumber{
-// 	0: {0, 1, 2, 4, 5, 6},
-// 	1: {2, 5},
-// 	2: {0, 2, 3, 4, 6},
-// 	3: {0, 2, 3, 5, 6},
-// 	4: {1, 2, 3, 5},
-// 	5: {0, 1, 3, 5, 6},
-// 	6: {0, 1, 3, 4, 5, 6},
-// 	7: {0, 2, 5},
-// 	8: {0, 1, 2, 3, 4, 5, 6},
-// 	9: {0, 1, 2, 3, 5, 6},
-// }
+var trueSegmentsByDigit = map[Digit][]TrueSegment{
+	0: {0, 1, 2, 4, 5, 6},
+	1: {2, 5},
+	2: {0, 2, 3, 4, 6},
+	3: {0, 2, 3, 5, 6},
+	4: {1, 2, 3, 5},
+	5: {0, 1, 3, 5, 6},
+	6: {0, 1, 3, 4, 5, 6},
+	7: {0, 2, 5},
+	8: {0, 1, 2, 3, 4, 5, 6},
+	9: {0, 1, 2, 3, 5, 6},
+}
 
 // var segmentCountByNumber = map[Digit]int{
 // 	0: 6,
