@@ -26,14 +26,14 @@ func main() {
 	}
 
 	sort.Ints(crabs)
-	median := crabs[len(crabs)/2] // not actually always the median, but works here
+	median := crabs[len(crabs)/2]
 
 	fmt.Printf("Part 1 - total Fuel usage: %d\n", totalDistance(crabs, median))
 
-	average := average(crabs) // is currently rounded down because that worked for me. Might have to be rounded up depending on data set.
+	average := average(crabs) // fuel assumed roughly proportional to distance squared
 	fmt.Println(average)
 
-	fmt.Printf("Part 2 - total Fuel usage: %d\n", totalSquareDistance(crabs, average))
+	fmt.Printf("Part 2 - total Fuel usage: %d\n", totalTriangleDistance(crabs, average))
 }
 
 func totalDistance(nums []int, goal int) int {
@@ -53,7 +53,8 @@ func average(nums []int) int {
 	return int(float64(sum) / float64(len(nums)))
 }
 
-func totalSquareDistance(nums []int, goal int) int {
+// distance for part 2
+func totalTriangleDistance(nums []int, goal int) int {
 	fuelUsage := 0
 	for _, n := range nums {
 		distance := absDiff(n, goal)
