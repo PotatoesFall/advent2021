@@ -13,14 +13,6 @@ type Line struct {
 	output  [4]Box
 }
 
-// AllBoxes returns both samples and output boxes
-func (l Line) AllBoxes() [14]Box {
-	var all [14]Box
-	copy(all[:10], l.samples[:])
-	copy(all[10:], l.output[:])
-	return all
-}
-
 // NewLine parses a line of input into a line
 func NewLine(str string) Line {
 	var lin Line
@@ -45,6 +37,17 @@ func NewLine(str string) Line {
 	}
 
 	return lin
+}
+
+// BoxWithLength returns the box from the samples with the specified length
+func (l Line) BoxWithLength(length int) Box {
+	for _, box := range l.samples {
+		if box.Count() == length {
+			return box
+		}
+	}
+
+	panic(`ashdsjkdhfkjsdf`)
 }
 
 // Box is a 7-segment display showing a number
@@ -88,6 +91,7 @@ func (b Box) String() string {
 	return str
 }
 
+// Segments returns all segments in the box that are on
 func (b Box) Segments() []Segment {
 	segments := []Segment{}
 
@@ -103,9 +107,25 @@ func (b Box) Segments() []Segment {
 // Segment refers to a specific Segment on a Box
 type Segment int
 
-// TrueSegment refers to the actual segment that a
-// Segment corresponds to
-type TrueSegment int
-
 // SegmentLabel is the name of the segment, such as 'a'
 type SegmentLabel rune
+
+var segmentByLabel = map[SegmentLabel]Segment{
+	'a': 0,
+	'b': 1,
+	'c': 2,
+	'd': 3,
+	'e': 4,
+	'f': 5,
+	'g': 6,
+}
+
+var segmentLabels = map[Segment]SegmentLabel{
+	0: 'a',
+	1: 'b',
+	2: 'c',
+	3: 'd',
+	4: 'e',
+	5: 'f',
+	6: 'g',
+}

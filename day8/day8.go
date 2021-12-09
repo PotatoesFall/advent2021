@@ -47,138 +47,80 @@ func countPart1(l Line) int {
 }
 
 func countPart2(l Line) int {
-	solver := NewSolver()
+	count := 0
 
-	for _, box := range l.AllBoxes() {
-		actualSegments := box.Segments()
-		possibleTrueSegments := possibleTrueSegmentsByCount[box.Count()]
-		notPossibleTrueSegments := invertTrueSegments(possibleTrueSegments)
-		solver.InvalidateRoundRobin(actualSegments, notPossibleTrueSegments)
-
-		solver.GetDigit(box)
+	for _, box := range l.output {
+		count *= 10
+		count += int(getDigit(l, box))
 	}
 
-	return -1
+	return count
 }
 
-// func count(l Line) int {
-// 	// initialize map with all values
-// 	possibleTrueSegNums := map[SegmentNumber][]SegmentNumber{}
-// 	for _, segN := range allSegNums {
-// 		possibleTrueSegNums[segN] = allSegNums[:]
-// 	}
+func getDigit(l Line, box Box) Digit {
+	box1 := l.BoxWithLength(2)
+	box4 := l.BoxWithLength(4)
 
-// 	// get all counts per segment
-// 	countsPerSeg := getSegmentCountsPerSegNum(l)
+	switch box.Count() {
+	case 2:
+		return Digit(1)
 
-// 	// remove all trueSegs that are not possible with all of those counts
-// 	maskTrueSegNumsByCounts(l, possibleTrueSegNums, countsPerSeg)
+	case 3:
+		return Digit(7)
 
-// 	// for each output, try and get a result
-// 	outputNumber := 0
-// 	for _, segs := range l.output {
-// 		outputNumber *= 10
-// 		outputNumber += int(getDigit(segs, possibleTrueSegNums))
-// 	}
+	case 4:
+		return Digit(4)
 
-// 	return outputNumber
-// }
+	case 5:
+		// 3 has full overlap with 1
+		if countBoxOverlap(box, box1) == 2 {
+			return 3
+		}
 
-// func getDigit(segs Box, possibleTrueSegNums map[SegmentNumber][]SegmentNumber) Digit {
-// 	possibleDigits := digitsBySegmentCount[segs.Count()]
+		// 5 has overlap 3 with 4
+		if countBoxOverlap(box, box4) == 3 {
+			return 5
+		}
 
-// 	if len(possibleDigits) == 1 {
-// 		return possibleDigits[0]
-// 	}
+		// 2 has overlap 2 with 4
+		if countBoxOverlap(box, box4) == 2 {
+			return 2
+		}
 
-// 	foundDigit := Digit(-1)
-// 	count := 0
+	case 6:
+		// 6 has overlap 1 with 1
+		if countBoxOverlap(box, box1) == 1 {
+			return 6
+		}
 
-// 	// try to find digit by going through possible ones
-// outer:
-// 	for _, possibleDigit := range possibleDigits {
+		// 9 has overlap 4 with 4
+		if countBoxOverlap(box, box4) == 4 {
+			return 9
+		}
 
-// 		// check that all necessary segments are possible
-// 		for _, needTrueSegN := range trueSegmentNumbersByDigit[possibleDigit] {
+		// 0 has overlap 3 with 4
+		if countBoxOverlap(box, box4) == 3 {
+			return 0
+		}
 
-// 			found := false
+	case 7:
+		return Digit(8)
+	}
 
-// 			// go through current segments to see if we have the true segment
-// 			for segN, on := range segs {
-// 				if !on {
-// 					continue
-// 				}
+	panic(box)
+}
 
-// 				possibleTrue := possibleTrueSegNums[SegmentNumber(segN)]
+func countBoxOverlap(a, b Box) int {
+	count := 0
 
-// 				// if we have it, we are good
-// 				for _, possibleSeg := range possibleTrue {
-// 					if needTrueSegN == possibleSeg {
-// 						found = true
-// 						break
-// 					}
-// 				}
+	for _, segmentA := range a.Segments() {
+		for _, segmentB := range b.Segments() {
+			if segmentA == segmentB {
+				count++
+				break
+			}
+		}
+	}
 
-// 			}
-// 			if !found {
-// 				continue outer
-// 			}
-
-// 			break
-// 		}
-
-// 		count++
-// 		foundDigit = possibleDigit
-// 		// break
-// 	}
-
-// 	if foundDigit == -1 {
-// 		panic("oof")
-// 	}
-
-// 	if count != 1 {
-// 		panic("oh no")
-// 	}
-
-// 	return foundDigit
-// }
-
-// func maskTrueSegNumsByCounts(l Line, possibleTrueSegNums map[SegmentNumber][]SegmentNumber, countsPerSeg map[SegmentNumber]map[int]bool) {
-// 	for segN, counts := range countsPerSeg {
-// 		for count, seen := range counts { // assume no false entries
-// 			if !seen {
-// 				continue
-// 			}
-
-// 			possibleTrueSegs, ok := possibleTrueSegmentsByCount[count]
-// 			if !ok {
-// 				panic(`aaaah`)
-// 			}
-
-// 			possibleTrueSegNums[segN] = maskSegments(possibleTrueSegNums[segN], possibleTrueSegs)
-// 		}
-// 	}
-// }
-
-// func getSegmentCountsPerSegNum(l Line) map[SegmentNumber]map[int]bool {
-// 	segmentCounts := map[SegmentNumber]map[int]bool{}
-
-// 	for _, segments := range l.AllSegments() {
-// 		for i, on := range segments {
-// 			if !on {
-// 				continue
-// 			}
-// 			segN := SegmentNumber(i)
-
-// 			_, ok := segmentCounts[segN]
-// 			if !ok {
-// 				segmentCounts[segN] = map[int]bool{}
-// 			}
-
-// 			segmentCounts[segN][segments.Count()] = true
-
-// 		}
-// 	}
-
-// 	return segmentCounts
-// }
+	return count
+}
