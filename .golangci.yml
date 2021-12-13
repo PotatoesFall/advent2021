@@ -25,7 +25,6 @@ linters:
     - goerr113
     - gofumpt
     - goimports
-    - revive
     - gosimple
     - govet
     - ineffassign
