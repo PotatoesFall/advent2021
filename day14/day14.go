@@ -1,10 +1,12 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"os"
+	"sort"
 )
+
+const rounds = 40
 
 func main() {
 	input, err := os.ReadFile(`input14`)
@@ -12,81 +14,42 @@ func main() {
 		panic(err)
 	}
 
-	lines := bytes.Split(input, []byte{'\n'})
+	polymer, rules := parseInput(input)
 
-	polymer := map[[2]byte]int64{}
-	polymerLine := lines[0]
-	start, end := polymerLine[0], polymerLine[len(polymerLine)-1]
-	for i := 0; i < len(polymerLine)-1; i++ {
-		key := [2]byte{polymerLine[i], polymerLine[i+1]}
-		polymer[key]++
-	}
-
-	rulesLines := lines[2:]
-
-	rules := map[[2]byte]byte{}
-	for _, rule := range rulesLines {
-		var key [2]byte
-		copy(key[:], rule[:2])
-
-		rules[key] = rule[6]
-	}
-
-	for i := 0; i < 40; i++ {
+	for i := 0; i < rounds; i++ {
 		polymer = polymerize(polymer, rules)
-		fmt.Println(countLetters(polymer, start, end))
 	}
 
-	counts := countLetters(polymer, start, end)
+	counts := letterCounts(polymer)
+	sortInt64(counts)
 
-	var largestLetter, smallestLetter byte
-	var largest, smallest int64 = 0, 1<<63 - 1
-	for letter, count := range counts {
-		fmt.Println(string(letter), count)
-		if count > largest {
-			largestLetter = letter
-			largest = count
-		}
-
-		if count < smallest {
-			smallestLetter = letter
-			smallest = count
-		}
-	}
-
-	fmt.Println(largest, smallest, largest-smallest)
-	fmt.Println(string(largestLetter), string(smallestLetter))
+	fmt.Println(counts[len(counts)-1] - counts[0])
 }
 
-func polymerize(polymer map[[2]byte]int64, rules map[[2]byte]byte) map[[2]byte]int64 {
-	added := map[[2]byte]int64{}
-	removed := map[[2]byte]int64{}
+func polymerize(polymer Polymer, rules Rules) Polymer {
+	diff := make(Polymer)
 
 	for pair, count := range polymer {
-		inBetween := rules[pair]
+		between := rules[pair]
 
-		added[[2]byte{pair[0], inBetween}] += count
-		added[[2]byte{inBetween, pair[1]}] += count
+		diff[pair] -= count
 
-		removed[pair] += count
+		diff[Pair{pair[0], between}] += count
+		diff[Pair{between, pair[1]}] += count
 	}
 
-	for addPair, count := range added {
-		polymer[addPair] += count
-	}
+	for pair, count := range diff {
+		polymer[pair] += count
 
-	for removePair, count := range removed {
-		polymer[removePair] -= count
-
-		if polymer[removePair] == 0 {
-			delete(polymer, removePair)
+		if polymer[pair] == 0 {
+			delete(polymer, pair)
 		}
 	}
 
 	return polymer
 }
 
-func countLetters(polymer map[[2]byte]int64, start, end byte) map[byte]int64 {
+func letterCounts(polymer Polymer) []int64 {
 	counts := map[byte]int64{}
 
 	for pair, count := range polymer {
@@ -95,13 +58,20 @@ func countLetters(polymer map[[2]byte]int64, start, end byte) map[byte]int64 {
 	}
 
 	for letter, count := range counts {
-		if letter == start || letter == end {
-			counts[letter] = (count + 1) / 2
-			continue
-		}
-
-		counts[letter] = count / 2
+		// start and end only counted once rather than double, will be odd
+		counts[letter] = (count + 1) / 2
 	}
 
-	return counts
+	countSlice := make([]int64, 0, len(counts))
+	for _, count := range counts {
+		countSlice = append(countSlice, count)
+	}
+
+	return countSlice
+}
+
+func sortInt64(slice []int64) {
+	sort.Slice(slice, func(i, j int) bool {
+		return slice[i] < slice[j]
+	})
 }
