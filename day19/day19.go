@@ -31,28 +31,36 @@ func main() {
 				continue
 			}
 
-			for j, alignedScanner := range scanners {
+			// for j, alignedScanner := range scanners {
+			// 	if !aligned[j] {
+			// 		continue
+			// 	}
+			// fmt.Printf("Trying to get scanner %d from %d:\n", i, j)
+
+			alignedScanner := &Scanner{}
+			for j, scanner := range scanners {
 				if !aligned[j] {
 					continue
 				}
+				alignedScanner.Beacons = append(alignedScanner.Beacons, scanner.Beacons...)
+				computeDiffs(alignedScanner)
+			}
 
-				// fmt.Printf("Trying to get scanner %d from %d:\n", i, j)
+			overlaps := countVectorOverlaps(alignedScanner, unalignedScanner)
+			if overlaps >= requiredVectorOverlap {
+				notDone = true
 
-				overlaps := countVectorOverlaps(alignedScanner, unalignedScanner)
-				if overlaps >= requiredVectorOverlap {
-					notDone = true
+				// if i != j {
+				// 	fmt.Printf("Getting scanner %d from %d: %d\n", i, j, overlaps)
+				// }
 
-					if i != j {
-						fmt.Printf("Getting scanner %d from %d: %d\n", i, j, overlaps)
-					}
-
-					align(alignedScanner, unalignedScanner)
-					if countPointOverlaps(alignedScanner, unalignedScanner) >= requiredOverlap {
-						aligned[i] = true
-						continue outer
-					}
+				align(alignedScanner, unalignedScanner)
+				if countPointOverlaps(alignedScanner, unalignedScanner) >= requiredOverlap {
+					aligned[i] = true
+					continue outer
 				}
 			}
+			// }
 		}
 	}
 
