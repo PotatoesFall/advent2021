@@ -6,7 +6,7 @@ func part1(players [2]Player) {
 	die := DeterministicDie{next: 1, limit: 100}
 
 	round := 0
-	for round < 1 || players[(round-1)%2].Score < 1_000 {
+	for players[(round+1)%2].Score < 1_000 {
 		players[round%2].Move(die.RollN(3))
 		round++
 	}
