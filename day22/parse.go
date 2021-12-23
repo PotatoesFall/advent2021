@@ -33,9 +33,9 @@ func parseLine(input []byte) RebootStep {
 	return RebootStep{
 		On: string(matches[1]) == `on`,
 		Cuboid: Cuboid{
-			X: NewRange(parseInt(matches[2]), parseInt(matches[3])),
-			Y: NewRange(parseInt(matches[4]), parseInt(matches[5])),
-			Z: NewRange(parseInt(matches[6]), parseInt(matches[7])),
+			NewRange(parseInt(matches[2]), parseInt(matches[3])+1),
+			NewRange(parseInt(matches[4]), parseInt(matches[5])+1),
+			NewRange(parseInt(matches[6]), parseInt(matches[7])+1),
 		},
 	}
 }

@@ -98,7 +98,7 @@ func splitByCuboid(target Cuboid, splitter Cuboid) Set {
 
 	for dim := range dimensions {
 		split(cuboids, splitter[dim].Min, dim)
-		split(cuboids, splitter[dim].Max+1, dim)
+		split(cuboids, splitter[dim].Max, dim)
 	}
 
 	return cuboids
@@ -108,14 +108,14 @@ func split(cuboids Set, v int64, dim int) {
 	newCuboids := Set{}
 
 	for cuboid := range cuboids {
-		if !(cuboid[dim].Has(v) && cuboid[dim].Has(v-1)) {
+		if !(cuboid[dim].Has(v)) {
 			continue
 		}
 		cuboids.Delete(cuboid)
 
 		newCuboid := cuboid
 
-		newCuboid[dim] = NewRange(cuboid[dim].Min, v-1)
+		newCuboid[dim] = NewRange(cuboid[dim].Min, v)
 		newCuboids.Put(newCuboid)
 
 		newCuboid[dim] = NewRange(v, cuboid[dim].Max)

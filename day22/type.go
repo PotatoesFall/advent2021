@@ -14,7 +14,7 @@ type Range struct {
 }
 
 func NewRange(min, max int64) Range {
-	if max >= min {
+	if max > min {
 		return Range{Min: min, Max: max}
 	}
 
@@ -28,7 +28,7 @@ func (r Range) All() []int64 {
 
 	n := make([]int64, 0, r.Max-r.Min+1)
 
-	for i := r.Min; i <= r.Max; i++ {
+	for i := r.Min; i < r.Max; i++ {
 		n = append(n, i)
 	}
 
@@ -40,7 +40,7 @@ func (r Range) Has(v int64) bool {
 		return false
 	}
 
-	return v >= r.Min && v <= r.Max
+	return v >= r.Min && v < r.Max
 }
 
 func (r Range) Contains(rang Range) bool {
@@ -56,7 +56,7 @@ func (r Range) Intersects(rang Range) bool {
 		return false
 	}
 
-	return rang.Max >= r.Min && rang.Min <= r.Max
+	return rang.Max > r.Min && rang.Min < r.Max
 }
 
 func (r Range) Size() int64 {
@@ -64,7 +64,7 @@ func (r Range) Size() int64 {
 		return 0
 	}
 
-	return r.Max - r.Min + 1
+	return r.Max - r.Min
 }
 
 type Cuboid [3]Range
