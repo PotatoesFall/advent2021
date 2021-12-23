@@ -96,10 +96,14 @@ func splitByCuboid(target Cuboid, splitter Cuboid) Set {
 	cuboids := Set{}
 	cuboids.Put(target)
 
+	// split into up to 27 pieces
 	for dim := range dimensions {
 		split(cuboids, splitter[dim].Min, dim)
 		split(cuboids, splitter[dim].Max, dim)
 	}
+
+	// improves performance by undoing unnecessary split
+	attemptMergeCuboids(cuboids)
 
 	return cuboids
 }
@@ -135,6 +139,55 @@ func intersection(c1, c2 Cuboid) Cuboid {
 	}
 
 	return cuboid
+}
+
+func attemptMergeCuboids(cuboids Set) {
+outer:
+	for {
+		for cuboid1 := range cuboids {
+			for cuboid2 := range cuboids {
+				cuboid, success := attemptMergeTwoCuboids(cuboid1, cuboid2)
+				if success {
+					cuboids.Delete(cuboid1)
+					cuboids.Delete(cuboid2)
+					cuboids.Put(cuboid)
+					continue outer
+				}
+			}
+		}
+
+		break
+	}
+}
+
+func attemptMergeTwoCuboids(c1, c2 Cuboid) (Cuboid, bool) {
+	for dim1 := range dimensions {
+		if c1[dim1] == c2[dim1] {
+			for dim2 := range dimensions {
+				if dim1 == dim2 {
+					continue
+				}
+
+				if c1[dim2] == c2[dim2] {
+					for dim3 := range dimensions {
+						if dim3 == dim2 {
+							continue
+						}
+
+						var cuboid Cuboid
+
+						cuboid[dim1] = c1[dim1]
+						cuboid[dim2] = c1[dim2]
+						cuboid[dim3] = NewRange(min(c1[dim3].Min, c2[dim3].Min), max(c1[dim3].Max, c2[dim3].Max))
+
+						return cuboid, true
+					}
+				}
+			}
+		}
+	}
+
+	return Cuboid{}, false
 }
 
 func min(a, b int64) int64 {
