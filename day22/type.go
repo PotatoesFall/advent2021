@@ -1,5 +1,13 @@
 package main
 
+const (
+	X = iota
+	Y
+	Z
+)
+
+var dimensions = [3]int{X, Y, Z}
+
 type Range struct {
 	Min, Max int64
 	Invalid  bool
@@ -59,26 +67,22 @@ func (r Range) Size() int64 {
 	return r.Max - r.Min + 1
 }
 
-type Cuboid struct {
-	X Range
-	Y Range
-	Z Range
-}
+type Cuboid [3]Range
 
 func (c Cuboid) Contains(cuboid Cuboid) bool {
-	return c.X.Contains(cuboid.X) && c.Y.Contains(cuboid.X) && c.Z.Contains(cuboid.X)
+	return c[X].Contains(cuboid[X]) && c[Y].Contains(cuboid[Y]) && c[Z].Contains(cuboid[Z])
 }
 
 func (c Cuboid) Intersects(cuboid Cuboid) bool {
-	return c.X.Intersects(cuboid.X) && c.Y.Intersects(cuboid.Y) && c.Z.Intersects(cuboid.Z)
+	return c[X].Intersects(cuboid[X]) && c[Y].Intersects(cuboid[Y]) && c[Z].Intersects(cuboid[Z])
 }
 
 func (c Cuboid) Points() []Point {
 	var points []Point
 
-	for _, x := range c.X.All() {
-		for _, y := range c.Y.All() {
-			for _, z := range c.Z.All() {
+	for _, x := range c[X].All() {
+		for _, y := range c[Y].All() {
+			for _, z := range c[Z].All() {
 				points = append(points, Point{x, y, z})
 			}
 		}
@@ -88,7 +92,13 @@ func (c Cuboid) Points() []Point {
 }
 
 func (c Cuboid) Size() int64 {
-	return c.X.Size() * c.Y.Size() * c.Z.Size()
+	var size int64 = 1
+
+	for i := range c {
+		size *= c[i].Size()
+	}
+
+	return size
 }
 
 type RebootStep struct {
@@ -103,6 +113,7 @@ func (s Set) Put(c Cuboid) {
 	if c.Size() == 0 {
 		return
 	}
+
 	s[c] = struct{}{}
 }
 
@@ -115,6 +126,4 @@ func (s Set) Delete(c Cuboid) {
 	delete(s, c)
 }
 
-type Point struct {
-	X, Y, Z int64
-}
+type Point [3]int64

@@ -96,92 +96,30 @@ func splitByCuboid(target Cuboid, splitter Cuboid) Set {
 	cuboids := Set{}
 	cuboids.Put(target)
 
-	splitX(cuboids, splitter.X.Min)
-	splitX(cuboids, splitter.X.Max+1)
-
-	splitY(cuboids, splitter.Y.Min)
-	splitY(cuboids, splitter.Y.Max+1)
-
-	splitZ(cuboids, splitter.Z.Min)
-	splitZ(cuboids, splitter.Z.Max+1)
+	for dim := range dimensions {
+		split(cuboids, splitter[dim].Min, dim)
+		split(cuboids, splitter[dim].Max+1, dim)
+	}
 
 	return cuboids
 }
 
-func splitX(cuboids Set, x int64) {
+func split(cuboids Set, v int64, dim int) {
 	newCuboids := Set{}
 
 	for cuboid := range cuboids {
-		if !(cuboid.X.Has(x) && cuboid.X.Has(x-1)) {
+		if !(cuboid[dim].Has(v) && cuboid[dim].Has(v-1)) {
 			continue
 		}
 		cuboids.Delete(cuboid)
 
-		newCuboids.Put(Cuboid{
-			X: NewRange(cuboid.X.Min, x-1),
-			Y: cuboid.Y,
-			Z: cuboid.Z,
-		})
+		newCuboid := cuboid
 
-		newCuboids.Put(Cuboid{
-			X: NewRange(x, cuboid.X.Max),
-			Y: cuboid.Y,
-			Z: cuboid.Z,
-		})
-	}
+		newCuboid[dim] = NewRange(cuboid[dim].Min, v-1)
+		newCuboids.Put(newCuboid)
 
-	for cuboid := range newCuboids {
-		cuboids.Put(cuboid)
-	}
-}
-
-func splitY(cuboids Set, y int64) {
-	newCuboids := Set{}
-
-	for cuboid := range cuboids {
-		if !(cuboid.Y.Has(y) && cuboid.Y.Has(y-1)) {
-			continue
-		}
-		cuboids.Delete(cuboid)
-
-		newCuboids.Put(Cuboid{
-			X: cuboid.X,
-			Y: NewRange(cuboid.Y.Min, y-1),
-			Z: cuboid.Z,
-		})
-
-		newCuboids.Put(Cuboid{
-			X: cuboid.X,
-			Y: NewRange(y, cuboid.Y.Max),
-			Z: cuboid.Z,
-		})
-	}
-
-	for cuboid := range newCuboids {
-		cuboids.Put(cuboid)
-	}
-}
-
-func splitZ(cuboids Set, z int64) {
-	newCuboids := Set{}
-
-	for cuboid := range cuboids {
-		if !(cuboid.Z.Has(z) && cuboid.Z.Has(z-1)) {
-			continue
-		}
-		cuboids.Delete(cuboid)
-
-		newCuboids.Put(Cuboid{
-			X: cuboid.X,
-			Y: cuboid.Y,
-			Z: NewRange(cuboid.Z.Min, z-1),
-		})
-
-		newCuboids.Put(Cuboid{
-			X: cuboid.X,
-			Y: cuboid.Y,
-			Z: NewRange(z, cuboid.Z.Max),
-		})
+		newCuboid[dim] = NewRange(v, cuboid[dim].Max)
+		newCuboids.Put(newCuboid)
 	}
 
 	for cuboid := range newCuboids {
@@ -190,11 +128,13 @@ func splitZ(cuboids Set, z int64) {
 }
 
 func intersection(c1, c2 Cuboid) Cuboid {
-	return Cuboid{
-		X: NewRange(max(c1.X.Min, c2.X.Min), min(c1.X.Max, c2.X.Max)),
-		Y: NewRange(max(c1.Y.Min, c2.Y.Min), min(c1.Y.Max, c2.Y.Max)),
-		Z: NewRange(max(c1.Z.Min, c2.Z.Min), min(c1.Z.Max, c2.Z.Max)),
+	cuboid := Cuboid{}
+
+	for dim := range dimensions {
+		cuboid[dim] = NewRange(max(c1[dim].Min, c2[dim].Min), min(c1[dim].Max, c2[dim].Max))
 	}
+
+	return cuboid
 }
 
 func min(a, b int64) int64 {
