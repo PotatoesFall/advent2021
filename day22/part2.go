@@ -5,8 +5,8 @@ import "fmt"
 func part2(steps []RebootStep) {
 	cuboidsOn := Set{}
 
-	for i, step := range steps {
-		fmt.Printf("(%3d/%3d)\n", i+1, len(steps))
+	for _, step := range steps {
+		// fmt.Printf("(%3d/%3d)\n", i+1, len(steps))
 
 		if step.On {
 			applyOnStep(cuboidsOn, step.Cuboid)
@@ -81,7 +81,7 @@ func applyOnStep(cuboidsOn Set, stepCuboid Cuboid) {
 	}
 }
 
-func intersect(c1, c2 Cuboid) (Set, Cuboid, Set) {
+func intersect(c1, c2 Cuboid) (Set, Cuboid, Set) { //nolint:unparam
 	left := splitByCuboid(c1, c2)
 	right := splitByCuboid(c2, c1)
 	intersect := intersection(c1, c2)
