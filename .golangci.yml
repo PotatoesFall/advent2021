@@ -18,7 +18,7 @@ linters:
     - errcheck
     - errorlint
     - exhaustive
-    - funlen
+    # - funlen
     - goconst
     - gocritic
     - gocyclo
@@ -28,7 +28,7 @@ linters:
     - gosimple
     - govet
     - ineffassign
-    - lll
+    # - lll
     - misspell
     - nakedret
     - nolintlint
@@ -36,7 +36,7 @@ linters:
     - exportloopref
     - staticcheck
     - structcheck
-    - stylecheck
+    # - stylecheck
     - typecheck
     - unconvert
     - unparam

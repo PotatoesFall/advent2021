@@ -1,5 +1,7 @@
 git.fuyu.moe/Fuyu/assert v0.2.1 h1:F8faRzPp0AhzGDYzv0S6eehbRTb72dc0V2ZMMo39ryo=
 git.fuyu.moe/Fuyu/assert v0.2.1/go.mod h1:Q/wfl8GbNF2ZRkaVOd4zcxr+1MTQ3UZLywWwaxxBzkk=
+git.ultraware.nl/martin/assert v0.0.7 h1:dOYm0JBA2UwZ6iLhdnZwxz6LNK7K5eF6wEqpo4P60AQ=
+git.ultraware.nl/martin/assert v0.0.7/go.mod h1:Nvj53wiuzSNeGcjh4Jw/PDx93v5n4znB+2dmDt2eeTo=
 github.com/google/go-cmp v0.4.0 h1:xsAVV57WRhGj6kEIi8ReJzQlHHqcBYCElAvkovg3B/4=
 github.com/google/go-cmp v0.4.0/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 golang.org/x/xerrors v0.0.0-20191204190536-9bdfabe68543 h1:E7g+9GITq07hpfrRu66IVDexMakfv52eLZ2CXBWiKr4=
