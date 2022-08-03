@@ -9,47 +9,53 @@ type Node[T any] struct {
 	Value T
 }
 
-type Heap[T any] []Node[T]
+type Heap[T any] struct {
+	Tree []Node[T]
+}
+
+func (h Heap[T]) Len() int {
+	return len(h.Tree)
+}
 
 func (h *Heap[T]) Extract() (T, bool) {
-	if len(*h) == 0 {
+	if len(h.Tree) == 0 {
 		var t T
 		return t, false
 	}
 
-	out := (*h)[0].Value
+	out := h.Tree[0].Value
 
-	(*h)[0] = (*h)[len(*h)-1] // set last value to first
-	*h = (*h)[:len(*h)-1]     // remove last value
+	h.Tree[0] = h.Tree[len(h.Tree)-1] // set last value to first
+	h.Tree = h.Tree[:len(h.Tree)-1]   // remove last value
 
-	downHeap(*h, 0)
+	downHeap(h.Tree, 0)
 
 	return out, true
 }
 
-func downHeap[T any](h Heap[T], i int) {
+func downHeap[T any](t []Node[T], i int) {
 	left := i*2 + 1
 	right := i*2 + 2
 	smallest := i
 
-	if len(h) > left && h[left].Score < h[smallest].Score {
+	if len(t) > left && t[left].Score < t[smallest].Score {
 		smallest = left
 	}
 
-	if len(h) > right && h[right].Score > h[smallest].Score {
+	if len(t) > right && t[right].Score > t[smallest].Score {
 		smallest = right
 	}
 
 	if smallest != i {
-		h[i], h[smallest] = h[smallest], h[i]
-		downHeap(h, smallest)
+		t[i], t[smallest] = t[smallest], t[i]
+		downHeap(t, smallest)
 	}
 }
 
 func (h *Heap[T]) Insert(score int, value T) {
-	*h = append(*h, Node[T]{score, value})
+	h.Tree = append(h.Tree, Node[T]{score, value})
 
-	upHeap(*h, len(*h)-1)
+	upHeap(*h, len(h.Tree)-1)
 }
 
 func upHeap[T any](h Heap[T], i int) {
@@ -59,8 +65,8 @@ func upHeap[T any](h Heap[T], i int) {
 
 	parent := (i - 1) / 2
 
-	if h[parent].Score > h[i].Score {
-		h[parent], h[i] = h[i], h[parent]
+	if h.Tree[parent].Score > h.Tree[i].Score {
+		h.Tree[parent], h.Tree[i] = h.Tree[i], h.Tree[parent]
 		upHeap(h, parent)
 	}
 }

@@ -1,141 +1,159 @@
 package main
 
-import (
-	"strings"
-)
+// import (
+// 	"strings"
+// )
 
-type State struct {
-	Amphipods [16]Amphipod
-	NotMoved  Bools16
-	MovedOnce Bools16
-}
+// type State struct {
+// 	Amphipods [16]Amphipod
+// 	NotMoved  Bools16
+// 	MovedOnce Bools16
+// }
 
-func (s State) String() string {
-	var str strings.Builder
+// func (s State) Done() bool {
+// 	for _, a := range s.Amphipods {
+// 		if !a.Home() {
+// 			return false
+// 		}
+// 	}
 
-	str.WriteString("#############\n#")
-	chars := [28]byte{'.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'}
-	for _, amph := range s.Amphipods {
-		chars[amph.Location] = amph.Type.Char()
-	}
+// 	return true
+// }
 
-	for i := 1; i <= 11; i++ {
-		str.WriteByte(chars[i])
-	}
-	str.WriteString("#\n###")
-	str.WriteByte(chars[12])
-	str.WriteByte('#')
-	str.WriteByte(chars[16])
-	str.WriteByte('#')
-	str.WriteByte(chars[20])
-	str.WriteByte('#')
-	str.WriteByte(chars[24])
-	str.WriteString("###\n  #")
-	str.WriteByte(chars[13])
-	str.WriteByte('#')
-	str.WriteByte(chars[17])
-	str.WriteByte('#')
-	str.WriteByte(chars[21])
-	str.WriteByte('#')
-	str.WriteByte(chars[25])
-	str.WriteString("#\n  #")
-	str.WriteByte(chars[14])
-	str.WriteByte('#')
-	str.WriteByte(chars[18])
-	str.WriteByte('#')
-	str.WriteByte(chars[22])
-	str.WriteByte('#')
-	str.WriteByte(chars[26])
-	str.WriteString("#\n  #")
-	str.WriteByte(chars[15])
-	str.WriteByte('#')
-	str.WriteByte(chars[19])
-	str.WriteByte('#')
-	str.WriteByte(chars[23])
-	str.WriteByte('#')
-	str.WriteByte(chars[27])
-	str.WriteString("#\n  ########")
+// func (s State) String() string {
+// 	var str strings.Builder
 
-	return str.String()
-}
+// 	str.WriteString("#############\n#")
+// 	chars := [28]byte{'.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'}
+// 	for _, amph := range s.Amphipods {
+// 		chars[amph.Location] = amph.Type.Char()
+// 	}
 
-func (s State) Compress() CompressedState {
-	var compressed CompressedState
+// 	for i := 1; i <= 11; i++ {
+// 		str.WriteByte(chars[i])
+// 	}
+// 	str.WriteString("#\n###")
+// 	str.WriteByte(chars[12])
+// 	str.WriteByte('#')
+// 	str.WriteByte(chars[16])
+// 	str.WriteByte('#')
+// 	str.WriteByte(chars[20])
+// 	str.WriteByte('#')
+// 	str.WriteByte(chars[24])
+// 	str.WriteString("###\n  #")
+// 	str.WriteByte(chars[13])
+// 	str.WriteByte('#')
+// 	str.WriteByte(chars[17])
+// 	str.WriteByte('#')
+// 	str.WriteByte(chars[21])
+// 	str.WriteByte('#')
+// 	str.WriteByte(chars[25])
+// 	str.WriteString("#\n  #")
+// 	str.WriteByte(chars[14])
+// 	str.WriteByte('#')
+// 	str.WriteByte(chars[18])
+// 	str.WriteByte('#')
+// 	str.WriteByte(chars[22])
+// 	str.WriteByte('#')
+// 	str.WriteByte(chars[26])
+// 	str.WriteString("#\n  #")
+// 	str.WriteByte(chars[15])
+// 	str.WriteByte('#')
+// 	str.WriteByte(chars[19])
+// 	str.WriteByte('#')
+// 	str.WriteByte(chars[23])
+// 	str.WriteByte('#')
+// 	str.WriteByte(chars[27])
+// 	str.WriteString("#\n  #########")
 
-	for _, amph := range s.Amphipods {
-		b := byte(amph.Type)             // bit representation
-		index := (amph.Location - 1) / 2 // index in CompressedState array
-		panic(`problem is somewhere here, they being swapped...`)
-		if amph.Location%2 == 1 {
-			b <<= 4
-		}
+// 	return str.String()
+// }
 
-		compressed[index] |= b
-	}
+// // func (s State) Compress() CompressedState {
+// // 	var compressed CompressedState
 
-	compressed[14] = s.NotMoved[0]
-	compressed[15] = s.NotMoved[1]
-	compressed[16] = s.MovedOnce[0]
-	compressed[17] = s.MovedOnce[1]
+// // 	for i, amph := range s.Amphipods {
+// // 		b := byte(amph.Location) // bit representation
+// // 		if b > 11 {
+// // 			b -= 12
+// // 		}
+// // 		index := i / 2 // index in CompressedState array
+// // 		if i%2 == 0 {
+// // 			b <<= 4
+// // 		}
 
-	return compressed
-}
+// // 		compressed[index] |= b
+// // 	}
 
-type CompressedState [18]byte
+// // 	compressed[8] = s.NotMoved[0]
+// // 	compressed[9] = s.NotMoved[1]
+// // 	compressed[10] = s.MovedOnce[0]
+// // 	compressed[11] = s.MovedOnce[1]
 
-func (cs CompressedState) Decompress() State {
-	var state State
+// // 	return compressed
+// // }
 
-	c := 0
-	for i := 0; i < 14; i++ {
-		if cs[i] == 0 {
-			continue
-		}
+// // type CompressedState [12]byte
 
-		one, two := cs[i]&0b11110000, cs[i]&0b00001111
+// // var amphipodTypesByI = [8]AmphipodType{A, A, B, B, C, C, D, D}
 
-		if one != 0 {
-			state.Amphipods[c] = Amphipod{AmphipodType(one >> 4), Location(i*2 + 1)}
-			// fmt.Println(cs[i], AmphipodType(one>>4), i*2+1)
-			c++
-		}
-		if two != 0 {
-			state.Amphipods[c] = Amphipod{AmphipodType(two), Location(i*2 + 2)}
-			// fmt.Println(cs[i], AmphipodType(two), i*2+2)
-			c++
-		}
-	}
+// // func (cs CompressedState) Decompress() State {
+// // 	state := State{
+// // 		NotMoved:  Bools16{cs[8], cs[9]},
+// // 		MovedOnce: Bools16{cs[10], cs[11]},
+// // 	}
 
-	state.NotMoved = Bools16{cs[14], cs[15]}
-	state.MovedOnce = Bools16{cs[16], cs[17]}
+// // 	for i := 0; i < 8; i++ {
+// // 		if cs[i] == 0 {
+// // 			continue
+// // 		}
 
-	return state
-}
+// // 		one, two := cs[i]&0b11110000, cs[i]&0b00001111
 
-type Bools16 [2]byte
+// // 		if state.NotMoved.Get(i*2) || !(state.MovedOnce.Get(i * 2)) {
+// // 			one += 12
+// // 		}
+// // 		if state.NotMoved.Get(i*2+1) || !(state.MovedOnce.Get(i*2 + 1)) {
+// // 			two += 12
+// // 		}
 
-func (b Bools16) Get(i int) bool {
-	return b[i/8]&((0b10000000)>>(i%8)) != 0
-}
+// // 		state.Amphipods[i*2] = Amphipod{
+// // 			Type:     amphipodTypesByI[i],
+// // 			Location: Location(one),
+// // 		}
+// // 		state.Amphipods[i*2+1] = Amphipod{
+// // 			Type:     amphipodTypesByI[i],
+// // 			Location: Location(two),
+// // 		}
+// // 	}
 
-func (b *Bools16) Set(i int, v bool) {
-	if v {
-		b[i/8] |= 0b10000000 >> (i % 8)
-	} else {
-		b[i/8] &^= 0b10000000 >> (i % 8)
-	}
-}
+// // 	return state
+// // }
 
-func (b Bools16) String() string {
-	var str strings.Builder
-	str.WriteString(`Bools16(0b`)
-	for i := 0; i < 16; i++ {
-		if b.Get(i) {
-			str.WriteRune('1')
-		} else {
-			str.WriteRune('0')
-		}
-	}
-	str.WriteString(`)`)
-	return str.String()
-}
+// type Bools16 [2]byte
+
+// func (b Bools16) Get(i int) bool {
+// 	return b[i/8]&((0b10000000)>>(i%8)) != 0
+// }
+
+// func (b *Bools16) Set(i int, v bool) {
+// 	if v {
+// 		b[i/8] |= 0b10000000 >> (i % 8)
+// 	} else {
+// 		b[i/8] &^= 0b10000000 >> (i % 8)
+// 	}
+// }
+
+// func (b Bools16) String() string {
+// 	var str strings.Builder
+// 	str.WriteString(`Bools16(0b`)
+// 	for i := 0; i < 16; i++ {
+// 		if b.Get(i) {
+// 			str.WriteRune('1')
+// 		} else {
+// 			str.WriteRune('0')
+// 		}
+// 	}
+// 	str.WriteString(`)`)
+// 	return str.String()
+// }
