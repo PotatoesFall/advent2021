@@ -37,9 +37,11 @@ func (a AmphipodType) DeepestGoalLocation() Location {
 	return amphipodDeepestGoalLocations[a]
 }
 
-// 1, 2, 4, 6, 7, 10, 11 hallway
+// 1, 2, 4, 6, 8, 10, 11 hallway
 // 12-27 siderooms
 type Location uint8
+
+var hallway = [...]Location{1, 2, 4, 6, 8, 10, 11}
 
 type Amphipod struct {
 	Type     AmphipodType
@@ -106,16 +108,12 @@ var goalState = State{
 
 var goalStateCompressed = goalState.Compress()
 
-const prealloc = 50_000_000
-
 func main() {
-	stateCosts := make(map[CompressedState]int, prealloc)
-	stateCosts[startingState.Compress()] = 0
-
-	aStarThisShit(stateCosts, startingState, 0)
+	n := aStarThisShit(startingState, 0)
+	fmt.Printf("Part 2 - %d\n", n)
 }
 
-func aStarThisShit(stateCosts map[CompressedState]int, state State, cost int) int {
+func aStarThisShit(state State, cost int) int {
 	openSet := minheap.New[CompressedState]()
 
 	cameFrom := map[CompressedState]CompressedState{}
@@ -133,8 +131,14 @@ func aStarThisShit(stateCosts map[CompressedState]int, state State, cost int) in
 
 	openSet.Insert(startFScore, startCompressed)
 
+	count := 0
+	farthest := 0
 	for len(openSet) > 0 {
-		fmt.Println(`lowestF:`, openSet[0].Score)
+		count++
+		if count%1_000_000 == 0 {
+			fmt.Println(`current size of openSet:`, len(openSet))
+		}
+		// fmt.Println(`lowestF:`, openSet[0].Score)
 		currentCompressed, ok := openSet.Extract()
 		if !ok {
 			break
@@ -146,7 +150,24 @@ func aStarThisShit(stateCosts map[CompressedState]int, state State, cost int) in
 
 		current := currentCompressed.Decompress()
 
+		farnessScore := 32
+		for i := 0; i < 16; i++ {
+			if current.MovedOnce.Get(i) {
+				farnessScore -= 1
+			}
+			if current.NotMoved.Get(i) {
+				farnessScore -= 2
+			}
+		}
+		if farnessScore > farthest {
+			farthest = farnessScore
+			fmt.Println(`NEW FARNESS:`, farthest)
+		}
+
+		// fmt.Printf("\n\nneighbors of\n%s\n", current)
 		for _, neighbor := range neighbors(current) {
+			// fmt.Printf("\n%s\n", neighbor.State)
+
 			neighborCompressed := neighbor.Compress()
 			tentativeGScore := gScore[currentCompressed] + neighbor.Distance
 
@@ -194,8 +215,8 @@ func distance(a, b Location) int {
 func _d(a, b Location) int {
 	// ANY TWO POINTS, NOT LIKE EARLIER
 	aSideroom, bSideroom := a > 11, b > 11
-	aRoomNum, bRoomNum := roomNum(a), roomNum(b) // 3, 5, 7, 9
-	aRoomDepth, bRoomDepth := depth(a), depth(b) // 1 through 4
+	aRoomNum, bRoomNum := getRoomNum(a), getRoomNum(b) // 3, 5, 7, 9
+	aRoomDepth, bRoomDepth := getDepth(a), getDepth(b) // 1 through 4
 	if aSideroom && bSideroom {
 		if aRoomNum != bRoomNum {
 			return abs(aRoomNum-bRoomNum) + aRoomDepth + bRoomDepth
@@ -226,51 +247,132 @@ func abs(a int) int {
 	return a
 }
 
-func depth(l Location) int { // 1 through 4
+func getDepth(l Location) int { // 1 through 4
 	return (int(l)-12)%4 + 1
 }
 
-func roomNum(l Location) int { // 3, 5, 7, 9
+func getRoomNum(l Location) int { // 3, 5, 7, 9
 	return 2*((int(l)-12)/4) + 3
 }
 
-func neighbors(state State) []Neighbor {
-	neighbors := make([]Neighbor, 0, 4*7) // at best we have 4 amphipods that can go to 1 of 7 spaces. the more amphipods in the hallway, the fewer options.
+func neighbors(state State) (neighbors []Neighbor) {
+	neighbors = make([]Neighbor, 0, 4*7) // at best we have 4 amphipods that can go to 1 of 7 spaces. the more amphipods in the hallway, the fewer options.
 
+outer:
 	for i := 0; i < 16; i++ {
-
 		if state.NotMoved.Get(i) {
+			// fmt.Println(`not moved:`, i)
 			// make first move
 			amph := state.Amphipods[i]
-			d := depth(amph.Location)
-			rn := roomNum(amph.Location)
-			path := make([]int, 0, 10) // longest possible path is 10
+			roomNum := getRoomNum(amph.Location)
+			depth := getDepth(amph.Location)
 
-			panic(`TODO`)
+			// check if we can reach the hallway
+			for i := 1; i < depth; i++ {
+				if !locationFree(state, amph.Location-Location(i)) {
+					// fmt.Println(`cant reach hallway`, amph.Location, roomNum, amph.Location-Location(i))
+					continue outer
+				}
+			}
+
+			destinations := make([]Location, 0, 7) // max 7 destinations in hallway
+
+			for _, destination := range hallway {
+				free := locationFree(state, destination)
+				if int(destination) > roomNum { // before room
+					if !free {
+						destinations = destinations[:] // clear all previous fields - inaccessible
+					} else {
+						destinations = append(destinations, destination)
+					}
+				} else {
+					if !free { // no more accessible fields on this side
+						break
+					} else {
+						destinations = append(destinations, destination)
+					}
+				}
+			}
+
+			for _, destination := range destinations {
+				neighborState := state
+
+				neighborState.Amphipods[i].Location = destination
+				neighborState.NotMoved.Set(i, false)
+				neighborState.MovedOnce.Set(i, true)
+
+				neighbors = append(neighbors, Neighbor{
+					State:    neighborState,
+					Distance: state.Amphipods[i].Type.Cost() * distance(state.Amphipods[i].Location, destination),
+				})
+			}
 		}
 
 		if state.MovedOnce.Get(i) {
 			// bring it home
 			amph := state.Amphipods[i]
-			sisters := getSisters(state.Amphipods, i)
-			d := depth(amph.Location)
-			rn := roomNum(amph.Location)
 
-			for _, sister := range sisters {
-				if roomNum(sister.Location) == rn {
+			destination := amph.Type.DeepestGoalLocation()
+			for {
+				amphType, ok := getFromLocation(state, destination)
+				if !ok { // goal is correct
+					break
+				}
+				if amphType == amph.Type { // goal might be one higher
+					destination--
+					if (destination-12)%4 == 3 { // already tried all, give up
+						continue outer
+					}
+					continue
+				}
+
+				continue outer // wrong amphipod type -> not possible
+			}
+
+			roomNum := getRoomNum(destination)
+			step := 1
+			if roomNum < int(amph.Location) {
+				step = -1
+			}
+
+			for l := int(destination) + step; l != roomNum; l += step {
+				if !locationFree(state, Location(l)) {
+					continue outer
 				}
 			}
-			panic(`TODO`)
+
+			neighborState := state
+
+			neighborState.Amphipods[i].Location = destination
+			neighborState.MovedOnce.Set(i, false)
+
+			neighbors = append(neighbors, Neighbor{
+				State:    neighborState,
+				Distance: state.Amphipods[i].Type.Cost() * distance(state.Amphipods[i].Location, destination),
+			})
 		}
+
 	}
 
 	return neighbors
 }
 
-func getSisters(amphs [16]Amphipod, i int) [3]Amphipod {
-	var sisters [3]Amphipod
-	offset := i % 4
-	copy(sisters[:], amphs[i-offset:i])
-	copy(sisters[offset:], amphs[i:i-offset+4])
-	return sisters
+func locationFree(state State, l Location) bool {
+	for i := range state.Amphipods {
+		if state.Amphipods[i].Location == l {
+			return false
+		}
+	}
+
+	return true
+}
+
+func getFromLocation(state State, l Location) (AmphipodType, bool) {
+	for i := range state.Amphipods {
+		if state.Amphipods[i].Location == l {
+			return state.Amphipods[i].Type, true
+		}
+	}
+
+	return 0, false
 }

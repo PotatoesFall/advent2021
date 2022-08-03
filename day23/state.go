@@ -114,13 +114,27 @@ func (cs CompressedState) Decompress() State {
 type Bools16 [2]byte
 
 func (b Bools16) Get(i int) bool {
-	return b[i/8]&((0b10000000)>>i%8) != 0
+	return b[i/8]&((0b10000000)>>(i%8)) != 0
 }
 
 func (b *Bools16) Set(i int, v bool) {
 	if v {
-		b[i/8] |= 0b10000000 >> i % 8
+		b[i/8] |= 0b10000000 >> (i % 8)
 	} else {
-		b[i/8] &^= 0b10000000 >> i % 8
+		b[i/8] &^= 0b10000000 >> (i % 8)
 	}
+}
+
+func (b Bools16) String() string {
+	var str strings.Builder
+	str.WriteString(`Bools16(0b`)
+	for i := 0; i < 16; i++ {
+		if b.Get(i) {
+			str.WriteRune('1')
+		} else {
+			str.WriteRune('0')
+		}
+	}
+	str.WriteString(`)`)
+	return str.String()
 }

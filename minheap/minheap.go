@@ -32,11 +32,11 @@ func downHeap[T any](h Heap[T], i int) {
 	right := i*2 + 2
 	smallest := i
 
-	if len(h) >= left && h[left].Score < h[smallest].Score {
+	if len(h) > left && h[left].Score < h[smallest].Score {
 		smallest = left
 	}
 
-	if len(h) >= right && h[right].Score > h[smallest].Score {
+	if len(h) > right && h[right].Score > h[smallest].Score {
 		smallest = right
 	}
 

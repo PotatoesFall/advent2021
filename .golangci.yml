@@ -14,7 +14,7 @@ linters:
   enable:
     - bodyclose
     - deadcode
-    - dupl
+    # - dupl
     - errcheck
     - errorlint
     - exhaustive
