@@ -14,7 +14,7 @@ func (s State) String() string {
 	var str strings.Builder
 
 	str.WriteString("#############\n#")
-	chars := [28]byte{'.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'}
+	chars := [28]byte{'.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.'}
 	for _, amph := range s.Amphipods {
 		chars[amph.Location] = amph.Type.Char()
 	}
@@ -65,6 +65,7 @@ func (s State) Compress() CompressedState {
 	for _, amph := range s.Amphipods {
 		b := byte(amph.Type)             // bit representation
 		index := (amph.Location - 1) / 2 // index in CompressedState array
+		panic(`problem is somewhere here, they being swapped...`)
 		if amph.Location%2 == 1 {
 			b <<= 4
 		}

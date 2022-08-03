@@ -19,3 +19,16 @@ func TestCompress(t *testing.T) {
 	fmt.Println(compressed)
 	assert.Eq(t, expected, compressed)
 }
+
+func TestBools17(t *testing.T) {
+	a := Bools16{0b11111111, 0b11111111}
+	for i := 0; i < 16; i++ {
+		if a.Get(i) == false {
+			t.Error(`false`, i)
+		}
+		a.Set(i, false)
+		if a.Get(i) == true {
+			t.Error(`true`, i)
+		}
+	}
+}

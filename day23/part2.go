@@ -118,11 +118,11 @@ func aStarThisShit(state State, cost int) int {
 
 	cameFrom := map[CompressedState]CompressedState{}
 
-	startCompressed := startingState.Compress()
-	startFScore := h(startingState)
+	startCompressed := state.Compress()
+	startFScore := h(state)
 
 	gScore := map[CompressedState]int{
-		startCompressed: 0,
+		startCompressed: cost,
 	}
 
 	fScore := map[CompressedState]int{
@@ -149,6 +149,20 @@ func aStarThisShit(state State, cost int) int {
 		}
 
 		current := currentCompressed.Decompress()
+
+		// if count%100_000 == 0 {
+		// 	fmt.Println("\n\n")
+		// 	bla := currentCompressed
+		// 	parent, ok := cameFrom[bla]
+		// 	for ok {
+		// 		fmt.Println("\ncame from:")
+		// 		fmt.Println(bla.Decompress())
+		// 		fmt.Println(bla.Decompress().NotMoved)
+		// 		fmt.Println(bla.Decompress().MovedOnce)
+		// 		bla = parent
+		// 		parent, ok = cameFrom[bla]
+		// 	}
+		// }
 
 		farnessScore := 32
 		for i := 0; i < 16; i++ {
@@ -188,11 +202,23 @@ func aStarThisShit(state State, cost int) int {
 func h(state State) int {
 	acc := -6666 // make heuristic admissible
 
+	var bInSpot, bBlocks bool
 	for _, amph := range state.Amphipods {
+		if amph.Location == 18 && amph.Type == B {
+			bInSpot = true
+		}
+		if amph.Location == 19 && amph.Type != B {
+			bBlocks = true
+		}
+
 		acc += distance(amph.Location, amph.Type.DeepestGoalLocation()) * amph.Type.Cost()
 	}
 
-	// TODO: account for having to get that B out before putting it back in? might make heuristic more accurate.
+	if bInSpot && bBlocks {
+		acc += B.Cost() * 8
+	}
+
+	// fmt.Println(state, acc)
 
 	if acc < 0 {
 		fmt.Println(state)
@@ -268,8 +294,8 @@ outer:
 			depth := getDepth(amph.Location)
 
 			// check if we can reach the hallway
-			for i := 1; i < depth; i++ {
-				if !locationFree(state, amph.Location-Location(i)) {
+			for j := 1; j < depth; j++ {
+				if !locationFree(state, amph.Location-Location(j)) {
 					// fmt.Println(`cant reach hallway`, amph.Location, roomNum, amph.Location-Location(i))
 					continue outer
 				}
@@ -279,9 +305,9 @@ outer:
 
 			for _, destination := range hallway {
 				free := locationFree(state, destination)
-				if int(destination) > roomNum { // before room
+				if int(destination) < roomNum { // before room
 					if !free {
-						destinations = destinations[:] // clear all previous fields - inaccessible
+						destinations = destinations[:0] // clear all previous fields - inaccessible
 					} else {
 						destinations = append(destinations, destination)
 					}
@@ -293,10 +319,12 @@ outer:
 					}
 				}
 			}
+			// fmt.Printf("destinations calculated for %s at %d: %v\n", amph.Type, amph.Location, destinations)
 
 			for _, destination := range destinations {
 				neighborState := state
 
+				fmt.Printf("first motion for amphipod i%d %s from %d to %d\n", i, amph.Type, amph.Location, destination)
 				neighborState.Amphipods[i].Location = destination
 				neighborState.NotMoved.Set(i, false)
 				neighborState.MovedOnce.Set(i, true)
@@ -321,7 +349,8 @@ outer:
 				if amphType == amph.Type { // goal might be one higher
 					destination--
 					if (destination-12)%4 == 3 { // already tried all, give up
-						continue outer
+						panic(`should never happen`)
+						// continue outer
 					}
 					continue
 				}
@@ -335,14 +364,17 @@ outer:
 				step = -1
 			}
 
-			for l := int(destination) + step; l != roomNum; l += step {
+			for l := int(amph.Location) + step; l != roomNum; l += step {
 				if !locationFree(state, Location(l)) {
+					a, _ := getFromLocation(state, Location(l))
+					fmt.Printf("going home: %s at %d blocked by %s at %d\n", amph.Type, amph.Location, a, l)
 					continue outer
 				}
 			}
 
 			neighborState := state
 
+			fmt.Println("DEST:", destination)
 			neighborState.Amphipods[i].Location = destination
 			neighborState.MovedOnce.Set(i, false)
 
@@ -351,7 +383,13 @@ outer:
 				Distance: state.Amphipods[i].Type.Cost() * distance(state.Amphipods[i].Location, destination),
 			})
 		}
+	}
 
+	fmt.Printf("\n\nneighbors of:\n%s\n%s\n%s\n", state, state.NotMoved, state.MovedOnce)
+	for _, neighbor := range neighbors {
+		fmt.Printf("\n%s\n", neighbor)
+		fmt.Println(neighbor.NotMoved)
+		fmt.Println(neighbor.MovedOnce)
 	}
 
 	return neighbors
