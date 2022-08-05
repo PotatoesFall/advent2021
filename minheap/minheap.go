@@ -1,16 +1,19 @@
 package minheap
 
-func New[T any]() Heap[T] {
-	return Heap[T]{}
+func New[T comparable]() Heap[T] {
+	return Heap[T]{
+		Map: make(map[T]int),
+	}
 }
 
-type Node[T any] struct {
-	Score int
+type Node[T comparable] struct {
+	Score float64
 	Value T
 }
 
-type Heap[T any] struct {
+type Heap[T comparable] struct {
 	Tree []Node[T]
+	Map  map[T]int
 }
 
 func (h Heap[T]) Len() int {
@@ -28,37 +31,50 @@ func (h *Heap[T]) Extract() (T, bool) {
 	h.Tree[0] = h.Tree[len(h.Tree)-1] // set last value to first
 	h.Tree = h.Tree[:len(h.Tree)-1]   // remove last value
 
-	downHeap(h.Tree, 0)
+	downHeap(h, 0)
+
+	if len(h.Tree) > 0 {
+		h.Map[h.Tree[0].Value] = 0
+	}
+
+	delete(h.Map, out)
 
 	return out, true
 }
 
-func downHeap[T any](t []Node[T], i int) {
+func downHeap[T comparable](h *Heap[T], i int) {
 	left := i*2 + 1
 	right := i*2 + 2
 	smallest := i
 
-	if len(t) > left && t[left].Score < t[smallest].Score {
+	if len(h.Tree) > left && h.Tree[left].Score < h.Tree[smallest].Score {
 		smallest = left
 	}
 
-	if len(t) > right && t[right].Score > t[smallest].Score {
+	if len(h.Tree) > right && h.Tree[right].Score < h.Tree[smallest].Score {
 		smallest = right
 	}
 
 	if smallest != i {
-		t[i], t[smallest] = t[smallest], t[i]
-		downHeap(t, smallest)
+		h.Tree[i], h.Tree[smallest] = h.Tree[smallest], h.Tree[i]
+		h.Map[h.Tree[i].Value] = i
+		h.Map[h.Tree[smallest].Value] = smallest
+		downHeap(h, smallest)
 	}
 }
 
-func (h *Heap[T]) Insert(score int, value T) {
-	h.Tree = append(h.Tree, Node[T]{score, value})
+func (h *Heap[T]) Insert(score float64, value T) {
+	if _, ok := h.Map[value]; ok {
+		return
+	}
 
-	upHeap(*h, len(h.Tree)-1)
+	h.Tree = append(h.Tree, Node[T]{score, value})
+	h.Map[value] = len(h.Tree) - 1
+
+	upHeap(h, len(h.Tree)-1)
 }
 
-func upHeap[T any](h Heap[T], i int) {
+func upHeap[T comparable](h *Heap[T], i int) {
 	if i == 0 {
 		return
 	}
@@ -67,6 +83,8 @@ func upHeap[T any](h Heap[T], i int) {
 
 	if h.Tree[parent].Score > h.Tree[i].Score {
 		h.Tree[parent], h.Tree[i] = h.Tree[i], h.Tree[parent]
+		h.Map[h.Tree[i].Value] = i
+		h.Map[h.Tree[parent].Value] = parent
 		upHeap(h, parent)
 	}
 }
